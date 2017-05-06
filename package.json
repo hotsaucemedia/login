@@ -1,0 +1,25 @@
+{
+  "name": "LoginProject",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "bcrypt": "latest",
+    "body-parser": "latest",
+    "connect-flash": "latest",
+    "cookie-parser": "latest",
+    "ejs": "latest",
+    "express": "latest",
+    "express-session": "latest",
+    "morgan": "latest",
+    "mysql": "^2.13.0",
+    "passport": "latest",
+    "passport-facebook": "latest",
+    "passport-local": "latest"
+  }
+}
