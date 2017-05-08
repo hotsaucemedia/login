@@ -1,0 +1,16 @@
+header {
+  background-image: url(../img/hotsauceBG.jpg);
+}
+
+.navbar-brand {
+  padding: 10px 15px;
+  line-height: 30px;
+}
+
+footer {
+  background-color: #ededed;
+  padding: 15px 0;
+}
+#login {
+	display: none;
+}

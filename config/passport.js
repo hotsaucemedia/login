@@ -1,137 +1,132 @@
-var LocalStrategy = require('passport-local').Strategy; // creating local strategy
-var localUser          = require('../app/models/user');
-
-var FacebookStrategy = require('passport-facebook').Strategy;
-var facebookUser = require('../app/models/facebookUser');
-var configAuth = require('./auth');
-var bcrypt = require('bcrypt');
-
-var mysql = require ('mysql');
-var configDB = require('../config/database');
-var connection = mysql.createConnection(configDB);
-connection.connect(function(err){
-	if(err) console.log("error in DB connection!");
-	else console.log("connected to DB");
-});
+// "use strict";
+// loading bcrypt module to secure passwords
+var bCrypt = require('bcrypt');
+// validator module helps to easily validate user inputs. It has Promises that are rejected when validation fails.
+// I used this because HTML input validator is not perfect.
+var validator = require('validator');
+var User            = require('../app/models/user');
 
 
-// module.exports allows its section to be available for the rest of programs 
-module.exports = function(passport) {
+module.exports = function(passport,user){
 
+	var User = user;
+	var LocalStrategy = require('passport-local').Strategy;
+	var FacebookStrategy = require('passport-facebook').Strategy;
+	var configAuth = require('./auth');
+
+
+	// passport has to save a user ID in the session, and it uses this to manage retrieving the user details when needed.
 	// serializing is to take all user information packed into one simple data (id)
-	// we can store user id as session data
-	passport.serializeUser(function(user, done){
-		connection.query('SELECT id FROM users WHERE email = ?', user.email, function(err,res){
-			if(err)	{return done(err);
-			} else { 
-				// console.log("this user id is serialized: ");
-				// console.log(res);
-			
-				done(null, res);
-			}
-		});
-	});		
-
-	// deserializing is to retreive all user info from its user id only
-	passport.deserializeUser(function(id, done){
-		
-		// TODO findById is a Mongo fucntion!
-		
-		var idString = JSON.stringify(id);
-		// console.log(id);
-		// console.log(idString);
-		var idJson = JSON.parse(idString);
-		// console.log(idJson);
-		// console.log(idJson[0].id);
+	// so that we can store user id as session data
+	passport.serializeUser(function(user, done) {
+	    done(null, user.id);
+	});
 
 
-		connection.query('SELECT * FROM users WHERE id = ?', idJson[0].id, function(err,res){
-			// console.log("this user id is deserialized: ");
-			// console.log(id);
-			// console.log(res);
-
-		  	done(err, res); 
-		});
+	// deserializing is to retrieve all user info from its user id
+	passport.deserializeUser(function(id, done) {
+	  	// Sequelize findById promise is to get the user, and if successful, an instance of the Sequelize model is returned.
+	  	// To get the User object from this instance, we use the Sequelize getter: user.get().
+	  	User.findById(id).then(function(user) {
+	    	if(user){
+	      		done(null, user.get());
+	    	}else{
+	      		done(user.errors,null);
+	    	}
+	  	});
 	});
 
 	// local signup passport
-	passport.use('local-signup', new LocalStrategy({
-		usernameField: 'email',
-		passwordField: 'password',
-		passReqToCallback: true
+	passport.use('local-signup', new LocalStrategy(
+	{           
+	  	// by default, local strategy uses username and password, we will override with email
+	  	usernameField : 'email', 	// here we assign email as username for local-signup strategy
+	  	passwordField : 'password',	// and password as password!
+	  	passReqToCallback : true 	// allows us to pass back the entire request to the callback
 	},
-	function(req, email, password, done){
-		// process.nextTick is making the function ascnc. 
-		process.nextTick(function(){
-			connection.query('SELECT * FROM users WHERE email = ?', email, function(err,res){	
-				if(err)
-					return done(err);
-				if(res.length > 0 && res.password != null){
-					console.log(res);
-					return done(null, false, req.flash('signupMessage', 'That email is already taken'));
-				} else if (res.length > 0 && res.password == null){
-					// var newUser = new localUser();
-					encPass = bcrypt.hashSync(password, bcrypt.genSaltSync(9));
-
-					connection.query('UPDATE users SET password = ? WHERE email = ?', [encPass, email], function (error, results, fields) {
-  						if (error) 
-  							throw error;
-  						console.log("you are updating table");
-  						return done(null,false, req.flash('signupMessage', 'You are successfully registered! login please...'));
-					})
-
-					}else{
-					var newUser = new localUser();
-					newUser.email = email;
-
-					newUser.password = bcrypt.hashSync(password, bcrypt.genSaltSync(9));
-
-					connection.query('INSERT INTO users SET ?', newUser, function(err,res){
-						if(err)
-							throw err;
-						console.log("you are creating new user");
-
-						return done(null, newUser);
-					})
-				}
-			})
-
-		});
-	}));
-
-	// strategy for local login
-	passport.use('local-login', new LocalStrategy({
-			usernameField: 'email',
-			passwordField: 'password',
-			passReqToCallback: true
-		},
+		// this function is a callback function for passport.use which is used to handle storing user's details
 		function(req, email, password, done){
-			// making process async
-			process.nextTick(function(){
-				connection.query('SELECT * FROM users WHERE email = ?', email, function(err,res){	
+		   	
+		   	// we are adding hashed password generating function inside the callback function
+		  	var generateHash = function(password) {
+		  	return bCrypt.hashSync(password, bCrypt.genSaltSync(9), null);
+		  	};
+		  	// User is an initializes Sequelize user model as per user.js
+		  	// using User we check if the users already exist, and if not we add them to database 
+		   	
+		   	// more detailed email validation based on Sequelize
+		   	
+		  	if (!validator.isEmail(email)) return done(null, false, req.flash('signupMessage', 'The email is not valid!'));
 
-					if(err)
-						return done(err);
-					if(res.length == 0)
-						return done(null, false, req.flash('loginMessage', 'No User found'));
-					
+		   	User.findOne({where: {email:email}}).then(function(user){
 
-					var resString = JSON.stringify(res);
-					var resJson = JSON.parse(resString);
+			  	if(user)
+			  	{
+			    	return done(null, false, req.flash('signupMessage', 'That email is already taken!'));
+			  	}else if (req.body.password != req.body.password2){
+			  			return done(null, false, req.flash('signupMessage', 'Passwords mismatch!'));
+			  	}else {
+			    	var userPassword = generateHash(password);
+			    	// here req.body object contains inputs from signup form. 
+			    	var data =
+			    		{ 
+			    			email:email,
+						    password:userPassword,
+						    firstname: req.body.firstname,
+						    lastname: req.body.lastname
+					    };
+					// User.create is a Sequelize method for adding new entries to the database (similar to mongoose!)
+			    	User.create(data).then(function(newUser,created){
+				     	if(!newUser){
+				        	return done(null,false);
+				      	}
+				      	if(newUser){
+				        	return done(null,newUser);
+				      	}
 
-					console.log(resJson[0].password);
-					
+			    	});
+			  	}
+			}); 
+		}
+	));
 
-					if(!bcrypt.compareSync(password, resJson[0].password)) {
-						
-						return done(null, false, req.flash('loginMessage', 'invalid password'));
-					}
-					return done(null, resJson[0]); 
+	// local login passport
+	passport.use('local-login', new LocalStrategy(
+	{
+	usernameField : 'email',
+	passwordField : 'password',
+	passReqToCallback : true
+	},
 
-				});
+		function(req, email, password, done) {
+			var User = user;
+			// isValidPassword function compares the password entered with the bCrypt comparison method
+			// since we stored our password with bcrypt
+			var isValidPassword = function(userpass,password){
+			  	return bCrypt.compareSync(password, userpass);
+			}
+
+			User.findOne({ where : { email: email}}).then(function (user) {
+
+			  	if (!user) {
+			    	return done(null, false, req.flash('loginMessage', 'No user found!'));
+			  	}
+
+			  	if (!isValidPassword(user.password,password)) {
+			    	return done(null, false, req.flash('loginMessage', 'Incorrect password!'));
+			  	}
+
+			  	var userinfo = user.get();
+			  	return done(null,userinfo);
+			}).catch(function(err){
+			  	console.log("Error: ",err);
+			  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Signin!' ));
 			});
 		}
 	));
+
+
+
 
 
 	// facebook signup passport
@@ -139,62 +134,46 @@ module.exports = function(passport) {
 	    clientID: configAuth.facebookAuth.clientID,
 	    clientSecret: configAuth.facebookAuth.clientSecret,
 	    callbackURL: configAuth.facebookAuth.callbackURL,
-	    profileFields: ['id', 'emails', 'name', 'gender', 'photos']
-	  },
-	  function(accessToken, refreshToken, profile, done) {
+	    profileFields: ['id', 'emails', 'name']
+	},
+	  	// function(accessToken, refreshToken, profile, done) {
+	  	function(accessToken, refreshToken, profile, done) {
 	    	process.nextTick(function(){
-	    		connection.query('SELECT * FROM users WHERE fid = ?', profile.id, function(err,res){	
-	    			// console.log("I am in facebook strategy");
-	    			if(err)
-	    				return done(err);
-	    			if(res.length > 0){
-	    				// console.log("You are a returning user. Welcome back!");
+   				
+   				console.log("I am in facebook auth!");
+   				console.log(profile.id);
 
-	    				var resString = JSON.stringify(res);
-						var resJson = JSON.parse(resString);
-						// console.log("I found you!");
-						// console.log(res);
-						// console.log(resJson[0]);
+				User.findOne({ where : { fid: profile.id}}).then(function (user) {
 
-	    				return done(null, resJson[0]);
-	    			} else{
-	    				// console.log("you are new user from facebook");
-	    				// console.log(profile.id);
-	    				// console.log(accessToken);
-	    				// console.log(profile.displayName);
-	    				// console.log(profile.emails[0].value , "\n\n");
-	    				// console.log(profile);
-
-	    				var newFuser 	= new facebookUser();
-						newFuser.fid = profile.id;
-	    				newFuser.ftoken = accessToken;
-	    				// console.log(newFuser.fid);
-
-	    				// console.log(profile._json.first_name);
-	    				// console.log(profile.givenName);
-	    				// console.log(profile.emails.length);
-
-
-	    				newFuser.name = profile._json.first_name + ' ' + profile._json.last_name;
-	    				
-	    				newFuser.email = profile.emails[0].value;
-	    				
-	    				if (profile.emails.length>1) {
-	    					newFuser.email2 = profile.emails[1].value;
-						}
-						console.log(newFuser);
-
-						connection.query('INSERT INTO users SET ?', newFuser, function(err,res){
-							if(err)
-								throw err;
-							return done(null, newFuser);
-						})
+	    			if(user){
+	    				var userinfo = user.get();
+				  		return done(null,userinfo);
 	    			}
-	    		});
-	    	});
-	    }
+	    			else {
+	    				var data =
+				    		{ 
+				    			fid:profile.id,
+				    			ftoken:accessToken, 
+				    			email:profile.emails[0].value,
+							    firstname:profile.name.givenName,
+							    lastname:profile.name.familyName
+						    };
+						User.create(data).then(function(newUser,created){
+					     	if(!newUser){
+					        	return done(null,false);
+					      	}else{
+					        	return done(null,newUser);
+					      	}
+				    	});
+				    	return null;
+	    			}
+	    		}).catch(function(err){
+				  	console.log("Error: ",err);
+				  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Signin!' ));
+				});
+			
+			});
+
+		}
 	));
-
-
-
-};
+}

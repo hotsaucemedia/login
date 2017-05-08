@@ -1,26 +1,56 @@
 <!doctype html>
 <html>
-<head>
-	<title>Node Authentication</title>
-	<link rel="stylesheet" href="../public/css/bootstrap.min.css"> 
-	<link rel="stylesheet" href="../public/css/font-awesome.min_2.css">
-	<style>
-		body 		{ padding-top:50px; }
-	</style>
-</head>
-<body>
-<div class="container">
+<head> <% include partials/template/head %> </head>
 
-	<div class="jumbotron text-center col-sm-6 col-sm-offset-3">
-		<h2><span class="fa fa-lock"></span> Local/Facebook Authentication in Node / MySQL</h2><br>
+<body id="page-top" class="index">
+	<header><% include ./partials/template/header.ejs %></header>
+	<section> <% include ./partials/template/nav.ejs %> </section>
+    <!-- Services Section -->
+    <section id="services">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2 class="section-heading">Services</h2>
+                    <h3 class="section-subheading text-muted">Hot Sauce Media is a small Software Consultant Firm specialized in:</h3>
+                </div>
+            </div>
+            <div class="row text-center">
+                <div class="col-md-6">
+                    <span class="fa-stack fa-4x">
+                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fa fa-server fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <h4 class="service-heading">Computer Science Training</h4>
+                    <p class="text-muted"><strong>Web</strong> techniques (client and server side), <strong>database</strong> design and administration, intro to advanced computer <strong>programming</strong> (C++, C#, Java and JavaScript), <strong>graphics</strong> and <strong>video game</strong> production.</p>
+                </div>
+                <div class="col-md-6">
+                    <span class="fa-stack fa-4x">
+                        <i class="fa fa-circle fa-stack-2x text-primary"></i>
+                        <i class="fa fa-laptop fa-stack-1x fa-inverse"></i>
+                    </span>
+                    <h4 class="service-heading">Software Consultancy</h4>
+                    <p class="text-muted">Cross platform <strong>desktop</strong> and <strong>mobile</strong> applications, web development and <strong>e-commerce</strong>.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+	<div class="container" id="login">
+	<!-- show any messages that come back with authentication -->
+		<% if (message.length > 0) { %>
+			<div class="alert alert-danger"><%= message %></div>
+		<% } %>
+		<div class="jumbotron text-center col-sm-6 col-sm-offset-3">
+			<h2><span class="fa fa-lock"></span> Local/Facebook Authentication in Node / MySQL</h2><br>
 
-		<p>Login or Register with:</p>
-		<a href="/login" class="btn btn-default"><span class="fa fa-user"></span> Local Login</a>
-		<a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
-		<a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+			<p>Login or Register with:</p>
+			<a href="/login" class="btn btn-default"><span class="fa fa-user"></span> Local Login</a>
+			<a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
+			<a href="/auth/facebook" class="btn btn-primary"><span class="fa fa-facebook"></span> Facebook</a>
+
+		</div>
 
 	</div>
-
-</div>
+	<footer><% include ./partials/template/footer.ejs %></footer>
+	<section><% include ./partials/template/jsdefault.ejs %></section>
 </body>
 </html>

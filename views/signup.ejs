@@ -1,13 +1,6 @@
 <!doctype html>
 <html>
-<head>
-	<title>Node Authentication</title>
-	<link rel="stylesheet" href="../public/css/bootstrap.min.css"> 
-	<link rel="stylesheet" href="../public/css/font-awesome.min_2.css">
-	<style>
-		body 		{ padding-top:50px; }
-	</style>
-</head>
+<head> <% include partials/template/head %> </head>
 <body>
 <div class="container">
 
@@ -21,18 +14,21 @@
 	<% } %>
 
 	<!-- SIGNUP FORM -->
-	<form action="/signup" method="post">
+	<form id="signup" name="signup" action="/signup" method="post">
 		<div class="form-group">
+			<label>First name</label>
+			<input type="text" class="form-control" name="firstname" required="required">
+			<label>Last name</label>
+			<input type="text" class="form-control" name="lastname" required="required">
 			<label>Email</label>
-			<input type="text" class="form-control" name="email">
-		</div>	
-
-		<div class="form-group">
-			<label>Password</label>
-			<input type="password" class="form-control" name="password">
+			<input type="email" class="form-control" name="email" required="required">
+			<label>Enter you password</label>
+			<input type="password" class="form-control" name="password" required="required">
+			<label>Retype the password</label>
+			<input type="password" class="form-control" name="password2" required="required">
 		</div>
 
-		<button type="submit" class="btn btn-warning btn-lg">Signup</button>
+		<button type="submit" class="btn btn-warning btn-lg" value="Sign up">Sign up</button>
 	</form>
 
 	<hr>

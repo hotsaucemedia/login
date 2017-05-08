@@ -1,13 +1,7 @@
 <!doctype html>
 <html>
-<head>
-	<title>Node Authentication</title>
-	<link rel="stylesheet" href="../public/css/bootstrap.min.css"> 
-	<link rel="stylesheet" href="../public/css/font-awesome.min_2.css">
-	<style>
-		body 		{ padding-top:50px; word-wrap:break-word; }
-	</style>
-</head>
+<head> <% include partials/template/head %> </head>
+
 <body>
 <div class="container">
 
@@ -25,9 +19,10 @@
 
 					<p>
 						<strong>id</strong>: <%= user.id%><br>
-						<strong>email</strong>: <%= user.email %><br>
-						<strong>name</strong>: <%= user.name %><br>
-						<strong>password</strong>: <%= user.password %>
+						<strong>First name</strong>: <%= user.firstname %><br>
+						<strong>Last name</strong>: <%= user.lastname %><br>
+						<strong>Email</strong>: <%= user.email %><br>
+						<strong>Password</strong>: <%= user.password %>
 					</p>
 
 			</div>
@@ -35,17 +30,17 @@
 
 		<!-- FACEBOOK INFORMATION -->
         <div class="col-sm-6">
-            <div class="well">
+            <div class="well" style="word-wrap:break-word;">
                 <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
 
                 <p>
                     <strong>fid</strong>: <%= user.fid %><br>
-                    <strong>token</strong>: <%= user.ftoken %><br>
-                    <strong>email</strong>: <%= user.email %><br>
-                    <strong>email2</strong>: <%= user.email2 %><br>
-                    <strong>name</strong>: <%= user.name %>
+                    <strong>First name</strong>: <%= user.firstname %><br>
+					<strong>Last name</strong>: <%= user.lastname %><br>
+                    <strong>Token</strong>: <%= user.ftoken %><br>
+                    <strong>Email</strong>: <%= user.email %><br>
+                    <strong>Email2</strong>: <%= user.email2 %>
                 </p>
-
             </div>
         </div>
 	</div>
