@@ -37,6 +37,7 @@ app.use(flash()); // use connect-flash for flash messages stored in session
 app.use("/public", express.static(path.join(__dirname, 'public'))); //static path declaration
 
 app.set('view engine', 'ejs'); // assigning view engine
+app.engine('html', require('ejs').renderFile);
 
 
 // importing models
@@ -44,6 +45,7 @@ var models = require("./app/models");
 
 // calling the Sequelize sync function to sync database
 models.sequelize.sync().then(function(){
+	// console.log(models.user);
     console.log('You are connected to the database using sequelize module!');
     }).catch(function(err){
     console.log(err,"Some problems with database connection!!!");
@@ -54,7 +56,7 @@ models.sequelize.sync().then(function(){
 var authRoute = require('./routes/routes.js')(app,passport);
 
 //loading passport strategies
-require('./config/passport.js')(passport,models.user);
+require('./config/passport.js')(passport, models.user, models.auth_user);
 
 
 

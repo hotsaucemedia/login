@@ -1,9 +1,7 @@
 module.exports = function(sequelize, Sequelize) {
 	// Sequelize user model is initialized earlier as User
 	var User = sequelize.define('user', {
-		id: { autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER},
-		fid: { type: Sequelize.TEXT},
-		ftoken: {type:Sequelize.TEXT},
+		id: { autoIncrement: true, primaryKey: true, type: Sequelize.INTEGER },
 		firstname: { type: Sequelize.STRING},
 		lastname: { type: Sequelize.STRING},
 		email: { type:Sequelize.STRING, validate: {isEmail:true} },
@@ -14,3 +12,6 @@ module.exports = function(sequelize, Sequelize) {
 	});
 	return User;
 }
+
+
+ // references:{model:'F_user', key:'f_id'}

@@ -20,6 +20,7 @@ fs
   .forEach(function(file) {
     var model = sequelize.import(path.join(__dirname, file));
     db[model.name] = model;
+    
   });
 
 Object.keys(db).forEach(function(modelName) {
@@ -32,5 +33,22 @@ Object.keys(db).forEach(function(modelName) {
 db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
+// setting table relations
+db.sequelize.models.auth_user.hasMany(db.sequelize.models.user, { foreignKey: 'auth_id' });
+db.sequelize.models.user.belongsTo(db.sequelize.models.auth_user, { foreignKey: 'auth_id' });
+
+db.sequelize.models.provider.hasMany(db.sequelize.models.auth_user, { foreignKey: 'provider_id' });
+db.sequelize.models.auth_user.belongsTo(db.sequelize.models.provider, { foreignKey: 'provider_id' });
+
+var data = {provider_name: "facebook"};
+
+// db.sequelize.models.provider.create(data).then(function(providerInput,created){
+//   if(!providerInput){
+//       return done(null,false);
+//     }else{
+//       console.log("The provider table is populated!");
+//       // return done(null);
+//     }
+// });
 
 module.exports = db;
