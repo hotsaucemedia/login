@@ -12,6 +12,7 @@
 	<% if (message.length > 0) { %>
 		<div class="alert alert-danger"><%= message %></div>
 	<% } %>
+		<div class="alert alert-danger alert-block fade" id="alert"></div>
 
 	<!-- SIGNUP FORM -->
 	<form id="signup" name="signup" action="/signup" method="post">
@@ -23,9 +24,9 @@
 			<label>Email</label>
 			<input type="email" class="form-control" name="email" required="required">
 			<label>Enter you password</label>
-			<input type="password" class="form-control" name="password" required="required">
-			<label>Retype the password</label>
-			<input type="password" class="form-control" name="password2" required="required">
+			<input type="password" class="form-control" name="password" id="password" required="required" onkeyup="invalidLength(this);">
+			<label>Confirm your password</label>
+			<input type="password" class="form-control" name="password2" id="password2" required="required" onkeyup="checkPass();">
 		</div>
 
 		<button type="submit" class="btn btn-warning btn-lg" value="Sign up">Sign up</button>
@@ -39,5 +40,40 @@
 </div>
 
 </div>
+
+
+
+	<section><% include ./partials/template/jsdefault.ejs %></section>
+<script>
+	function checkPass(){
+	    var p1 = document.getElementById("password");
+	    var p2 = document.getElementById("password2");
+	    var el = document.getElementById("alert");
+	    if( p1.value != p2.value){
+	        p2.setCustomValidity("Passwords don't match!");
+	        $('#alert').addClass('in'); 
+	        $("#alert").html("Passwords do not match!");
+			    }else{
+			$("#alert").removeClass('in');
+	        p2.setCustomValidity("");
+	    }
+	}
+	
+
+	function invalidLength(item){
+		if(item.value.length < 5) {
+			console.log(item.value.length);
+			item.setCustomValidity("Password must be at least 5 characters!");
+			$('#alert').addClass('in'); 
+	        $("#alert").html("Password must be at least 5 characters!");
+		}else{
+			$("#alert").removeClass('in');
+        	item.setCustomValidity("");
+		}
+	}
+</script>
+
+
 </body>
+
 </html>

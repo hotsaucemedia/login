@@ -21,6 +21,7 @@
     "mysql": "^2.13.0",
     "passport": "latest",
     "passport-facebook": "latest",
+    "passport-google-oauth": "^1.0.0",
     "passport-local": "latest",
     "sequelize": "^3.30.4"
   }

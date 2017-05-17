@@ -33,18 +33,26 @@ module.exports = function(app, passport){
 	// isLoggedIn is a function middleware to check before any access to profile page
 	app.get('/profile', isLoggedIn, function(req, res){		
 		res.render('profile.ejs', {user: req.user});
-
 	});
 
 
 	// route to facebook login
-	app.get('/auth/facebook', passport.authenticate('facebook', {scope: ['email']}),function(req,res){});
+	app.get('/auth/facebook', passport.authenticate('facebook', { authType: 'rerequest', scope: [ 'email', 'user_friends'] }),function(req,res){});
 
 	// routes after callback from facebook login
 	app.get('/auth/facebook/callback', passport.authenticate('facebook', { 
 		successRedirect: '/profile',
-	    failureRedirect: '/' 
+	    failureRedirect: '/login' 
 	}));
+
+
+	app.get('/auth/google', passport.authenticate('google', { authType: 'rerequest', scope: ['profile', 'email']}));
+
+	app.get('/auth/google/callback', passport.authenticate('google', {
+		successRedirect: '/profile',
+		failureRedirect: '/login' 
+	}));
+
 
 	// route to logout page
 	app.get('/logout', function(req, res){

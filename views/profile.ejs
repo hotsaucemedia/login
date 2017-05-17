@@ -13,8 +13,8 @@
 	<div class="row">
 
 		<!-- LOCAL INFORMATION -->
-		<div class="col-sm-6">
-			<div class="well">
+		<div class="col-sm-4">
+			<div class="well" style="word-wrap:break-word;">
 				<h3><span class="fa fa-user"></span> Local</h3>
 
 					<p>
@@ -29,20 +29,36 @@
 		</div>
 
 		<!-- FACEBOOK INFORMATION -->
-        <div class="col-sm-6">
+        <div class="col-sm-4">
             <div class="well" style="word-wrap:break-word;">
-                <h3 class="text-primary"><span class="fa fa-facebook"></span> Facebook</h3>
+                <h3><span class="fa fa-facebook"></span> Facebook</h3>
 
                 <p>
-                    <strong>fid</strong>: <%= user.auth_id %><br>
+                    <strong>fid</strong>: <%= user.f_id %><br>
                     <strong>First name</strong>: <%= user.firstname %><br>
 					<strong>Last name</strong>: <%= user.lastname %><br>
-                    <strong>Token</strong>: <%= user.token %><br>
+                    <strong>Token</strong>: <%= user.f_token %><br>
                     <strong>Email</strong>: <%= user.email %><br>
-                    <strong>Email2</strong>: <%= user.email2 %>
                 </p>
             </div>
         </div>
+
+        <!-- GOOGLE INFORMATION -->
+        <div class="col-sm-4">
+            <div class="well" style="word-wrap:break-word;">
+                <h3><span class="fa fa-google"></span> Google</h3>
+
+                <p>
+                    <strong>gid</strong>: <%= user.g_id %><br>
+                    <strong>First name</strong>: <%= user.firstname %><br>
+					<strong>Last name</strong>: <%= user.lastname %><br>
+                    <strong>Token</strong>: <%= user.g_token %><br>
+                    <strong>Email</strong>: <%= user.email %><br>
+                </p>
+            </div>
+        </div>
+
+
 	</div>
 
 </div>

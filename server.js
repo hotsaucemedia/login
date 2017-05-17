@@ -43,6 +43,7 @@ app.engine('html', require('ejs').renderFile);
 // importing models
 var models = require("./app/models");
 
+
 // calling the Sequelize sync function to sync database
 models.sequelize.sync().then(function(){
 	// console.log(models.user);

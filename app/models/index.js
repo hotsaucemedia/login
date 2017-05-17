@@ -34,13 +34,13 @@ db.sequelize = sequelize;
 db.Sequelize = Sequelize;
 
 // setting table relations
-db.sequelize.models.auth_user.hasMany(db.sequelize.models.user, { foreignKey: 'auth_id' });
-db.sequelize.models.user.belongsTo(db.sequelize.models.auth_user, { foreignKey: 'auth_id' });
+db.sequelize.models.user.hasMany(db.sequelize.models.auth_user, { foreignKey: 'user_id' });
+db.sequelize.models.auth_user.belongsTo(db.sequelize.models.user, { foreignKey: 'user_id' });
 
 db.sequelize.models.provider.hasMany(db.sequelize.models.auth_user, { foreignKey: 'provider_id' });
 db.sequelize.models.auth_user.belongsTo(db.sequelize.models.provider, { foreignKey: 'provider_id' });
 
-var data = {provider_name: "facebook"};
+// var data = {provider_name: "facebook"};
 
 // db.sequelize.models.provider.create(data).then(function(providerInput,created){
 //   if(!providerInput){
