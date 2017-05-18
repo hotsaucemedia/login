@@ -39,14 +39,16 @@
 		<% if (message.length > 0) { %>
 			<div class="alert alert-danger"><%= message %></div>
 		<% } %>
-		<div class="jumbotron text-center col-sm-6 col-sm-offset-3">
-			<h2><span class="fa fa-lock"></span> Local/Facebook Authentication in Node / MySQL</h2><br>
+		<div class="jumbotron text-center col-sm-8 col-sm-offset-2">
+            <h3><span class="fa fa-lock"></span> Local/Social network Authentication in Node-Js</h3 >
+            <h4 class="text-center"> Sequelize / MySQL</h4><br>
 
 			<p>Login or Register with:</p>
 			<a href="/login" class="btn btn-default"><span class="fa fa-user"></span> Local Login</a>
 			<a href="/signup" class="btn btn-default"><span class="fa fa-user"></span> Local Signup</a>
 			<a href="/auth/facebook" class="btn btn-default"><span class="fa fa-facebook"></span> Facebook</a>
             <a href="/auth/google" class="btn btn-default"><span class="fa fa-google-plus"></span> Google</a>
+            <a href="/auth/twitter" class="btn btn-default"><span class="fa fa-twitter"></span> Twitter</a>
 
 		</div>
 

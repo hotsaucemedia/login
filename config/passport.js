@@ -16,9 +16,11 @@ module.exports = function(passport, user, auth_user){
 	var LocalStrategy = require('passport-local').Strategy;
 	var FacebookStrategy = require('passport-facebook').Strategy;
 	var GoogleStrategy = require('passport-google-oauth').OAuth2Strategy;
+	var TwitterStrategy = require('passport-twitter').Strategy;
 
 	var configAuth = require('./auth');
  
+
 	// passport has to save a user ID in the session, and it uses this to manage retrieving the user details when needed.
 	// serializing is to take all user information packed into one simple data (id)
 	// so that we can store user id as session data
@@ -38,7 +40,6 @@ module.exports = function(passport, user, auth_user){
 	    	}
 	  	});
 	});
-
 
 
 	// local signup passport
@@ -146,7 +147,7 @@ module.exports = function(passport, user, auth_user){
 			  	var userinfo = user.get();
 			  	return done(null,userinfo);
 			}).catch(function(err){
-			  	console.log("Error: ",err);
+			  	console.log("###### Error : ",err);
 			  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Signin!' ));
 			});
 		}
@@ -155,141 +156,116 @@ module.exports = function(passport, user, auth_user){
 
 	// facebook signup passport
 	passport.use(new FacebookStrategy({
-	    clientID: configAuth.facebookAuth.clientID,
-	    clientSecret: configAuth.facebookAuth.clientSecret,
-	    callbackURL: configAuth.facebookAuth.callbackURL,
-	    profileFields: ['id', 'emails', 'name', 'displayName', 'photos'],
-	   	passReqToCallback : true 
+	    clientID 			: configAuth.facebookAuth.clientID,
+	    clientSecret 		: configAuth.facebookAuth.clientSecret,
+	    callbackURL 		: configAuth.facebookAuth.callbackURL,
+	    profileFields 		: ['id', 'emails', 'name', 'displayName', 'photos'],
+	   	passReqToCallback 	: true 
 	},
-	  	function(req, accessToken, refreshToken, profile, done) {
+		function(req, accessToken, refreshToken, profile, done) {
 	    	process.nextTick(function(){				
-				Auth_user.findOne({ where : { auth_id: profile.id }}).then(function (auth_user) {
-	    			if(auth_user){
-	    				// TODO: get user info from corresponsing user or fuser table 
-	    				console.log("01-I found similar facebook!");
-	    				User.findOne({ where : { id: auth_user.user_id }}).then(function(user){
-	    					if(user){
-	    						console.log("02-I found similar facebook and local!");
-								var userinfo = user.get();
-				  				return done(null,userinfo);
-	    					}else {
-	    						console.log("03- you logged in with facebook earlier only!");
-	    						return done(null, false);
-	    					}
-	    				}).catch(function(err){
-				  			console.log("Error: ",err);
-				  			return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login!' ));
-						});
+				User.findOne({ where : { f_id: profile.id }}).then(function (user) {
+	    			if(user){	    				
+						var userinfo = user.get();
+				  		return done(null,userinfo);
 	    			}else {
-	    				console.log("04-This is the first login with facebook!");
-	    				// TODO create a user in user table and save corresponding data in f-user as well   				
-				    	User.findOne({
-				    			where : { email : profile.emails[0].value }}).then(function(user){
+				    	User.findOne({ where : { email : profile.emails[0].value }}).then(function(user){
 				    		if(user){
-				    				console.log("05- Your first facebook but you have been already registered!");
-									var dataForAuth_user =
-						    		{ 
-						    			auth_id:profile.id,
-						    			token:accessToken,
-						    			firstname: profile.name.givenName,
-						    			lastname: profile.name.familyName,
-						    			email: profile.emails[0].value,
-						    			user_id : user.id,
-						    			imageURL: profile.photos[0].value,
-						    			displayName: profile.displayName,
-						    			provider_id:1
-								    };
+								var dataForAuth_user =
+					    		{ 
+					    			auth_id 	: profile.id,
+					    			token 		: accessToken,
+					    			firstname 	: profile.name.givenName,
+					    			lastname 	: profile.name.familyName,
+					    			email 		: profile.emails[0].value,
+					    			user_id  	: user.id,
+					    			imageURL 	: profile.photos[0].value,
+					    			displayName : profile.displayName,
+					    			provider_id : 1
+							    };
 
-							    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
-								     	if(!newAuthUser){
-								     		console.log("06-I could not register you facebook data!");
-								        	//return done(null,false);
-								        	return null;
-								      	}else{
-								        	console.log("07- The new facebook user is created!");
-								        	// return done(null, newUser);
-								        	return null;
-								      	}
-							    	}).catch(function(err){
-				  						console.log("Error: ",err);
-				  						return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing Auth_user!' ));
-									});
-									// upfating user table for this new login
-						    		var data = { 
-									    f_id 	: profile.id,
-									    f_token : accessToken
-								    };
-								    // updating user info only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-								    User.update(data, { where: { email: profile.emails[0].value} }).then(function(){
-								    // check return!!!!!!!!!!!!!!!user!!!!!!!!!!!!!!!!!!!111
-								    var userinfo = user.get();
-								    return done(null, userinfo);
-									});
-	    				
+						    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
+							     	if(!newAuthUser){
+			  							return done(null, false, req.flash('loginMessage', 'Problem in registering your Facebook profile!' ));
+							      	}else{
+							        	console.log("A new facebook user is created!");
+							        	return null;
+							      	}
+						    	}).catch(function(err){
+			  						console.log("###### Error : ",err);
+			  						return done(null, false, req.flash('loginMessage', 'Something went wrong while registering your Facebook profile in our database!' ));
+								});
+					    		var data = { 
+								    f_id 	: profile.id,
+								    f_token : accessToken,
+								    f_name 	: profile.displayName
+							    };
+							    User.update(data, { where: { email: profile.emails[0].value} }).then(function(){
+							    	var userinfo = user.get();
+							    	return done(null, userinfo);
+						    	}).catch(function(err){
+			  						console.log("###### Error : ",err);
+			  						return done(null, false, req.flash('loginMessage', 'Something went wrong while updating your profile based on Facebook data!' ));
+								});
+							    				
 				    		}else{
 				    			console.log("08- This is your first facebook and you did not yet registered locally!");
 				    			var dataForUser =
 					    		{ 
-					    			firstname: profile.name.givenName,
-					    			lastname: profile.name.familyName,
-					    			f_id: profile.id,
-					    			f_token: accessToken,
-					    			email: profile.emails[0].value
+					    			firstname 	: profile.name.givenName,
+					    			lastname 	: profile.name.familyName,
+					    			f_id 		: profile.id,
+					    			f_token 	: accessToken,
+								    f_name 		: profile.displayName,
+					    			email 		: profile.emails[0].value
 							    };
 				    			User.create(dataForUser).then(function(newUser,created){
 				    				if(!newUser){
-				    					console.log("09- This is your first facebook, I could not register you locally!");
-							        	return done(null,false);
+			  							return done(null, false, req.flash('loginMessage', 'Problem in creating your local profile based on facebook data!' ));
 							      	}else{
 							      		console.log("10- This is your first facebook and you are just registered locally!");
 										var dataForAuth_user =
-							    		{ 
-							    			auth_id:profile.id,
-							    			token:accessToken,
-							    			firstname: profile.name.givenName,
-							    			lastname: profile.name.familyName,
-							    			email: profile.emails[0].value,
-							    			imageURL: profile.photos[0].value,
-						    				displayName: profile.displayName,
-							    			user_id : newUser.id,
-							    			provider_id:1
+							    		{
+							    			auth_id 	: profile.id,
+							    			token 		: accessToken,
+							    			firstname 	: profile.name.givenName,
+							    			lastname 	: profile.name.familyName,
+							    			email 		: profile.emails[0].value,
+							    			user_id  	: newUser.id,
+							    			imageURL 	: profile.photos[0].value,
+							    			displayName : profile.displayName,
+							    			provider_id : 1
 									    };
-
 								    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
 									     	if(!newAuthUser){
-									     		console.log("11- This is your first facebook and I could not register you facebook data!");
-									        	//return done(null,false);
-									        	return null;
+			  									return done(null, false, req.flash('loginMessage', 'Problem in registering your Facebook profile!' ));
 									      	}else{
 									        	console.log("12- The new facebook user is created!");
-									        	// return done(null, newUser);
 									        	return null;
 									      	}
 								    	}).catch(function(err){
-				  							console.log("Error: ",err);
-				  							return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing Auth_user!' ));
+				  							console.log("###### Error : ",err);
+				  							return done(null, false, req.flash('loginMessage', 'Problem in registering your Facebook profile!' ));
 										});
-
 							        	return done(null, newUser);
 							      	}
 				    			}).catch(function(err){
-								  	console.log("Error: ",err);
-								  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login  while accessing User!' ));
+								  	console.log("###### Error : ",err);
+								  	return done(null, false, req.flash('loginMessage', 'Problem in registering your local user profile!' ));
 								});
 				    		}
 				    	}).catch(function(err){
-				  			console.log("Error: ",err);
-				  			return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing User!' ));
+				  			console.log("###### Error : ",err);
+				  			return done(null, false, req.flash('loginMessage', 'Problem in searching the local user table for Facebook email!' ));
 						});	
 				    	// return null;
 	    			}
 	    		}).catch(function(err){
-				  	console.log("Error: ",err);
-				  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing Auth_user!' ));
+				  	console.log("###### Error : ",err);
+				  	return done(null, false, req.flash('loginMessage', 'Problem in searching for facebook id in the local user table!' ));
 				});
 			
 			});
-
 		}
 	));
 
@@ -303,135 +279,229 @@ module.exports = function(passport, user, auth_user){
    	   	passReqToCallback : true 
 
 	},
-	function(req, accessToken, refreshToken, profile, done) {
+		function(req, accessToken, refreshToken, profile, done) {
 	    	process.nextTick(function(){				
-				Auth_user.findOne({ where : { auth_id: profile.id }}).then(function (auth_user) {
-	    			if(auth_user){
-	    				// TODO: get user info from corresponsing user or fuser table 
-	    				console.log("01-I found similar google!");
-	    				User.findOne({ where : { id: auth_user.user_id }}).then(function(user){
-	    					if(user){
-	    						console.log("02-I found similar google and local!");
-								var userinfo = user.get();
-				  				return done(null,userinfo);
-	    					}else {
-	    						console.log("03- you logged in with google earlier only!");
-	    						return done(null, false);
-	    					}
-	    				}).catch(function(err){
-				  			console.log("Error: ",err);
-				  			return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login!' ));
-						});
+				User.findOne({ where : { g_id: profile.id }}).then(function (user) {
+	    			if(user){	    				
+						var userinfo = user.get();
+				  		return done(null,userinfo);
 	    			}else {
-	    				console.log("04-This is the first login with google!");
-	    				// TODO create a user in user table and save corresponding data in f-user as well   				
-				    	User.findOne({
-				    			where : { email : profile.emails[0].value }}).then(function(user){
+				    	User.findOne({ where : { email : profile.emails[0].value }}).then(function(user){
 				    		if(user){
-				    				console.log("05- Your first google but you have been already registered!");
-									var dataForAuth_user =
-						    		{ 
-						    			auth_id:profile.id,
-						    			token:accessToken,
-						    			firstname: profile.name.givenName,
-						    			lastname: profile.name.familyName,
-						    			email: profile.emails[0].value,
-						    			user_id : user.id,
-						    			imageURL: profile.photos[0].value,
-						    			displayName: profile.displayName,
-						    			provider_id:2
-								    };
+								var dataForAuth_user =
+					    		{ 
+					    			auth_id 	: profile.id,
+					    			token 		: accessToken,
+					    			firstname 	: profile.name.givenName,
+					    			lastname 	: profile.name.familyName,
+					    			email 		: profile.emails[0].value,
+					    			user_id  	: user.id,
+					    			imageURL 	: profile.photos[0].value,
+					    			displayName : profile.displayName,
+					    			provider_id : 2
+							    };
 
-							    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
-								     	if(!newAuthUser){
-								     		console.log("06-I could not register you google data!");
-								        	//return done(null,false);
-								        	return null;
-								      	}else{
-								        	console.log("07- The new google user is created!");
-								        	// return done(null, newUser);
-								        	return null;
-								      	}
-							    	}).catch(function(err){
-				  						console.log("Error: ",err);
-				  						return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing Auth_user!' ));
-									});
-									// upfating user table for this new login
-						    		var data = { 
-									    g_id 	: profile.id,
-									    g_token : accessToken
-								    };
-								    // updating user info only!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-								    User.update(data, { where: { email: profile.emails[0].value} }).then(function(){
-								    // check return!!!!!!!!!!!!!!!user!!!!!!!!!!!!!!!!!!!111
-								    var userinfo = user.get();
-								    return done(null, userinfo);
-									});
-
+						    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
+							     	if(!newAuthUser){
+			  							return done(null, false, req.flash('loginMessage', 'Problem in registering your Google profile!' ));
+							      	}else{
+							        	console.log("A new Google user is created!");
+							        	return null;
+							      	}
+						    	}).catch(function(err){
+			  						console.log("###### Error : ",err);
+			  						return done(null, false, req.flash('loginMessage', 'Something went wrong while registering your Google profile in our database!' ));
+								});
+					    		var data = { 
+								    g_id 	: profile.id,
+								    g_token : accessToken,
+								    g_name 	: profile.displayName
+							    };
+							    User.update(data, { where: { email: profile.emails[0].value} }).then(function(){
+							    	var userinfo = user.get();
+							    	return done(null, userinfo);
+						    	}).catch(function(err){
+			  						console.log("###### Error : ",err);
+			  						return done(null, false, req.flash('loginMessage', 'Something went wrong while updating your profile based on Google data!' ));
+								});
+							    				
 				    		}else{
-				    			console.log("08- This is your first google and you did not yet registered locally!");
+				    			console.log("08- This is your first Google and you did not yet registered locally!");
 				    			var dataForUser =
 					    		{ 
-					    			firstname: profile.name.givenName,
-					    			lastname: profile.name.familyName,
-					    			g_id: profile.id,
-					    			g_token: accessToken,
-					    			email: profile.emails[0].value
+					    			firstname 	: profile.name.givenName,
+					    			lastname 	: profile.name.familyName,
+					    			g_id 		: profile.id,
+					    			g_token 	: accessToken,
+								    g_name 		: profile.displayName,
+					    			email 		: profile.emails[0].value
 							    };
 				    			User.create(dataForUser).then(function(newUser,created){
 				    				if(!newUser){
-				    					console.log("09- This is your first google, I could not register you locally!");
-							        	return done(null,false);
+			  							return done(null, false, req.flash('loginMessage', 'Problem in creating your local profile based on Google data!' ));
 							      	}else{
-							      		console.log("10- This is your first google and you are just registered locally!");
+							      		console.log("10- This is your first Google and you are just registered locally!");
 										var dataForAuth_user =
-							    		{ 
-							    			auth_id:profile.id,
-							    			token:accessToken,
-							    			firstname: profile.name.givenName,
-							    			lastname: profile.name.familyName,
-							    			email: profile.emails[0].value,
-							    			imageURL: profile.photos[0].value,
-						    				displayName: profile.displayName,
-							    			user_id : newUser.id,
-							    			provider_id:2
+							    		{
+							    			auth_id 	: profile.id,
+							    			token 		: accessToken,
+							    			firstname 	: profile.name.givenName,
+							    			lastname 	: profile.name.familyName,
+							    			email 		: profile.emails[0].value,
+							    			user_id  	: newUser.id,
+							    			imageURL 	: profile.photos[0].value,
+							    			displayName : profile.displayName,
+							    			provider_id : 2
 									    };
-
 								    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
 									     	if(!newAuthUser){
-									     		console.log("11- This is your first google and I could not register you facebook data!");
-									        	//return done(null,false);
-									        	return null;
+			  									return done(null, false, req.flash('loginMessage', 'Problem in registering your Google profile!' ));
 									      	}else{
-									        	console.log("12- The new google user is created!");
-									        	// return done(null, newUser);
+									        	console.log("12- The new Google user is created!");
 									        	return null;
 									      	}
 								    	}).catch(function(err){
-				  							console.log("Error: ",err);
-				  							return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing Auth_user!' ));
+				  							console.log("###### Error : ",err);
+				  							return done(null, false, req.flash('loginMessage', 'Problem in registering your Google profile!' ));
 										});
-
 							        	return done(null, newUser);
 							      	}
 				    			}).catch(function(err){
-								  	console.log("Error: ",err);
-								  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login  while accessing User!' ));
+								  	console.log("###### Error : ",err);
+								  	return done(null, false, req.flash('loginMessage', 'Problem in registering your local user profile!' ));
 								});
 				    		}
 				    	}).catch(function(err){
-				  			console.log("Error: ",err);
-				  			return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing User!' ));
+				  			console.log("###### Error : ",err);
+				  			return done(null, false, req.flash('loginMessage', 'Problem in searching the local user table for Google email!' ));
 						});	
 				    	// return null;
 	    			}
 	    		}).catch(function(err){
-				  	console.log("Error: ",err);
-				  	return done(null, false, req.flash('loginMessage', 'Something went wrong with your Facebook login while accessing Auth_user!' ));
+				  	console.log("###### Error : ",err);
+				  	return done(null, false, req.flash('loginMessage', 'Problem in searching for Google id in the local user table!' ));
 				});
 			
 			});
+		}
+	));
 
+
+passport.use(new TwitterStrategy({
+	    consumerKey: configAuth.twitterAuth.consumerKey,
+	    consumerSecret: configAuth.twitterAuth.consumerSecret,
+	    callbackURL: configAuth.twitterAuth.callbackURL,
+	    userProfileURL: "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true",
+	    includeEmail: true,
+   	   	passReqToCallback : true 
+
+	},
+		function(req, accessToken, refreshToken, profile, done) {
+	    	process.nextTick(function(){				
+				User.findOne({ where : { t_id: profile.id }}).then(function (user) {
+	    			if(user){	    				
+						var userinfo = user.get();
+				  		return done(null,userinfo);
+	    			}else {
+				    	User.findOne({ where : { email : profile.emails[0].value }}).then(function(user){
+				    		if(user){
+				    			var name = profile.displayName.split(" ");
+								var dataForAuth_user =
+					    		{ 
+					    			auth_id 	: profile.id,
+					    			token 		: accessToken,
+					    			firstname 	: name[0],
+					    			lastname 	: name[1],
+					    			email 		: profile.emails[0].value,
+					    			user_id  	: user.id,
+					    			imageURL 	: profile.photos[0].value,
+					    			displayName : profile.displayName,
+					    			provider_id : 3
+							    };
+
+						    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
+							     	if(!newAuthUser){
+			  							return done(null, false, req.flash('loginMessage', 'Problem in registering your twitter profile!' ));
+							      	}else{
+							        	console.log("A new twitter user is created!");
+							        	return null;
+							      	}
+						    	}).catch(function(err){
+			  						console.log("###### Error : ",err);
+			  						return done(null, false, req.flash('loginMessage', 'Something went wrong while registering your twitter profile in our database!' ));
+								});
+					    		var data = {
+								    t_id 	: profile.id,
+								    t_token : accessToken,
+								    t_name 	: profile.displayName
+							    };
+							    User.update(data, { where: { email: profile.emails[0].value} }).then(function(){
+							    	var userinfo = user.get();
+							    	return done(null, userinfo);
+						    	}).catch(function(err){
+			  						console.log("###### Error : ",err);
+			  						return done(null, false, req.flash('loginMessage', 'Something went wrong while updating your profile based on twitter data!' ));
+								});
+							    				
+				    		}else{
+				    			console.log("08- This is your first twitter and you did not yet registered locally!");
+				    			var name = profile.displayName.split(" ");
+				    			var dataForUser =
+					    		{ 
+					    			firstname 	: name[0],
+					    			lastname 	: name[1],
+					    			t_id 		: profile.id,
+					    			t_token 	: accessToken,
+								    t_name 		: profile.displayName,
+					    			email 		: profile.emails[0].value
+							    };
+				    			User.create(dataForUser).then(function(newUser,created){
+				    				if(!newUser){
+			  							return done(null, false, req.flash('loginMessage', 'Problem in creating your local profile based on twitter data!' ));
+							      	}else{
+							      		console.log("10- This is your first twitter and you are just registered locally!");
+						    			var name = profile.displayName.split(" ");
+										var dataForAuth_user =
+							    		{ 
+							    			auth_id 	: profile.id,
+							    			token 		: accessToken,
+							    			firstname 	: name[0],
+							    			lastname 	: name[1],
+							    			email 		: profile.emails[0].value,
+							    			user_id  	: newUser.id,
+							    			imageURL 	: profile.photos[0].value,
+							    			displayName : profile.displayName,
+							    			provider_id : 3
+									    };
+								    	Auth_user.create(dataForAuth_user).then(function(newAuthUser,created){
+									     	if(!newAuthUser){
+			  									return done(null, false, req.flash('loginMessage', 'Problem in registering your twitter profile!' ));
+									      	}else{
+									        	console.log("12- The new twitter user is created!");
+									        	return null;
+									      	}
+								    	}).catch(function(err){
+				  							console.log("###### Error : ",err);
+				  							return done(null, false, req.flash('loginMessage', 'Problem in registering your twitter profile!' ));
+										});
+							        	return done(null, newUser);
+							      	}
+				    			}).catch(function(err){
+								  	console.log("###### Error : ",err);
+								  	return done(null, false, req.flash('loginMessage', 'Problem in registering your local user profile!' ));
+								});
+				    		}
+				    	}).catch(function(err){
+				  			console.log("###### Error : ",err);
+				  			return done(null, false, req.flash('loginMessage', 'Problem in searching the local user table for twitter email!' ));
+						});	
+				    	// return null;
+	    			}
+	    		}).catch(function(err){
+				  	console.log("###### Error : ",err);
+				  	return done(null, false, req.flash('loginMessage', 'Problem in searching for twitter id in the local user table!' ));
+				});
+			});
 		}
 	));
 }

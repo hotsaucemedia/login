@@ -13,7 +13,7 @@
 	<div class="row">
 
 		<!-- LOCAL INFORMATION -->
-		<div class="col-sm-4">
+		<div class="col-sm-3">
 			<div class="well" style="word-wrap:break-word;">
 				<h3><span class="fa fa-user"></span> Local</h3>
 
@@ -21,22 +21,21 @@
 						<strong>id</strong>: <%= user.id%><br>
 						<strong>First name</strong>: <%= user.firstname %><br>
 						<strong>Last name</strong>: <%= user.lastname %><br>
-						<strong>Email</strong>: <%= user.email %><br>
-						<strong>Password</strong>: <%= user.password %>
+						<strong>Password</strong>: <%= user.password %><br>
+						<strong>Email</strong>: <%= user.email %>
 					</p>
 
 			</div>
 		</div>
 
 		<!-- FACEBOOK INFORMATION -->
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <div class="well" style="word-wrap:break-word;">
                 <h3><span class="fa fa-facebook"></span> Facebook</h3>
 
                 <p>
                     <strong>fid</strong>: <%= user.f_id %><br>
-                    <strong>First name</strong>: <%= user.firstname %><br>
-					<strong>Last name</strong>: <%= user.lastname %><br>
+                    <strong>displayName</strong>: <%= user.f_name %><br>
                     <strong>Token</strong>: <%= user.f_token %><br>
                     <strong>Email</strong>: <%= user.email %><br>
                 </p>
@@ -44,20 +43,32 @@
         </div>
 
         <!-- GOOGLE INFORMATION -->
-        <div class="col-sm-4">
+        <div class="col-sm-3">
             <div class="well" style="word-wrap:break-word;">
-                <h3><span class="fa fa-google"></span> Google</h3>
+                <h3><span class="fa fa-google-plus"></span> Google</h3>
 
                 <p>
                     <strong>gid</strong>: <%= user.g_id %><br>
-                    <strong>First name</strong>: <%= user.firstname %><br>
-					<strong>Last name</strong>: <%= user.lastname %><br>
+                    <strong>displayName</strong>: <%= user.g_name %><br>
                     <strong>Token</strong>: <%= user.g_token %><br>
                     <strong>Email</strong>: <%= user.email %><br>
                 </p>
             </div>
         </div>
 
+        <!-- TWITTER INFORMATION -->
+        <div class="col-sm-3">
+            <div class="well" style="word-wrap:break-word;">
+                <h3><span class="fa fa-twitter"></span> Twitter</h3>
+
+                <p>
+                    <strong>tid</strong>: <%= user.t_id %><br>
+                    <strong>displayName</strong>: <%= user.t_name %><br>
+                    <strong>Token</strong>: <%= user.t_token %><br>
+                    <strong>Email</strong>: <%= user.email %><br>
+                </p>
+            </div>
+        </div>
 
 	</div>
 

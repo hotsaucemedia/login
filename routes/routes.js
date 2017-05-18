@@ -54,6 +54,15 @@ module.exports = function(app, passport){
 	}));
 
 
+	app.get('/auth/twitter', passport.authenticate('twitter', { authType: 'rerequest', scope: ['profile', 'email']}));
+
+	app.get('/auth/twitter/callback', passport.authenticate('twitter', {
+		successRedirect: '/profile',
+		failureRedirect: '/login' 
+	}));
+
+
+
 	// route to logout page
 	app.get('/logout', function(req, res){
 		// console.log(req.session);

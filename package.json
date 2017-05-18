@@ -23,6 +23,7 @@
     "passport-facebook": "latest",
     "passport-google-oauth": "^1.0.0",
     "passport-local": "latest",
+    "passport-twitter": "^1.0.4",
     "sequelize": "^3.30.4"
   }
 }

@@ -1,0 +1,23 @@
+[33mcommit b80907be61d00767efde083ba827a250dcd879ed[m
+Author: Mohammadreza Neghabi <Mohammadreza Neghabi>
+Date:   Wed May 17 12:43:37 2017 -0400
+
+    linked google_facebook_local login
+
+[33mcommit 4163862d4ed14eb504a260c21c209b383a1814fa[m
+Author: Mohammadreza Neghabi <Mohammadreza Neghabi>
+Date:   Mon May 15 11:17:17 2017 -0400
+
+    using 3 tables to handle user info
+
+[33mcommit 325da3d38a2ccee1c0443d09a0bebb19c7103ca9[m
+Author: Mohammadreza Neghabi <Mohammadreza Neghabi>
+Date:   Mon May 8 16:57:10 2017 -0400
+
+    swiching from pure mysql to sequelize
+
+[33mcommit a48cf509f7447327b37d923b18183989782b8831[m
+Author: Mohammadreza Neghabi <Mohammadreza Neghabi>
+Date:   Fri May 5 20:10:04 2017 -0400
+
+    First commit
