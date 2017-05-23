@@ -1,6 +1,6 @@
 
-module.exports = function(app, passport){
-	
+module.exports = function(app, passport, user){
+	var User = user;
 	// route to homepage
 	app.get('/', function(req, res){
 		res.render('index.ejs', { message: req.flash('signupMessage') });
@@ -58,10 +58,55 @@ module.exports = function(app, passport){
 
 	app.get('/auth/twitter/callback', passport.authenticate('twitter', {
 		successRedirect: '/profile',
-		failureRedirect: '/login' 
+		failureRedirect: '/login'
 	}));
 
 
+	app.get('/connect/facebook', passport.authorize('facebook', { authType: 'rerequest', scope: [ 'email', 'user_friends'] }));
+	app.get('/connect/google', passport.authorize('google', { authType: 'rerequest', scope: ['profile', 'email']}));
+	app.get('/connect/twitter', passport.authorize('twitter', { authType: 'rerequest', scope: ['profile', 'email']}));
+
+	app.get('/unlink/facebook', function(req, res){
+		var user = req.user;
+		user.f_id = null;
+		user.f_token = null;
+		user.f_name = null;
+	    User.update(user, { where: { email: req.user.email} }).then(function(){
+	    	req.flash('profileMessage', 'Your facebook account is unlinked!');
+	    	res.redirect('/profile');
+		}).catch(function(err){
+		  	console.log("###### Error : ",err);
+		  	return done(null, false, req.flash('profileMessage', 'Problem in updating user information in user table!' ));
+		});
+	});
+
+	app.get('/unlink/google', function(req, res){
+		var user = req.user;
+		user.g_id = null;
+		user.g_token = null;
+		user.g_name = null;
+	    User.update(user, { where: { email: req.user.email} }).then(function(){
+	    	req.flash('profileMessage', 'Your google account is unlinked!');
+	    	res.redirect('/profile');
+		}).catch(function(err){
+		  	console.log("###### Error : ",err);
+		  	return done(null, false, req.flash('profileMessage', 'Problem in updating user information in user table!' ));
+		});
+	});
+
+	app.get('/unlink/twitter', function(req, res){
+		var user = req.user;
+		user.t_id = null;
+		user.t_token = null;
+		user.t_name = null;
+	    User.update(user, { where: { email: req.user.email} }).then(function(){
+	    	req.flash('profileMessage', 'Your twitter account is unlinked!');
+	    	res.redirect('/profile');
+		}).catch(function(err){
+		  	console.log("###### Error : ",err);
+		  	return done(null, false, req.flash('profileMessage', 'Problem in updating user information in user table!' ));
+		});
+	});
 
 	// route to logout page
 	app.get('/logout', function(req, res){

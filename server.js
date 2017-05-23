@@ -13,6 +13,9 @@ var bodyParser = require('body-parser');
 var flash = require('connect-flash');
 var path = require('path');
 
+// compressin is used to increase performance
+var compression = require('compression');
+
 // dotenv handles environment variables
 var env        = require('dotenv').load()
 
@@ -21,6 +24,11 @@ var env        = require('dotenv').load()
 // in this case, JSON format is used.
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
+
+// note to this position: if I put this line below session declaration, deserializer invokes enerytime I am loding un image, css or js file! too bad!
+app.use("/public", express.static(path.join(__dirname, 'public'))); //static path declaration
+
+app.use(compression());
 
 // both passport and express-session modules are needed to handle authentication.
 // initializing passport and the express session and passport session 
@@ -34,7 +42,6 @@ app.use(passport.session()); // persistent login sessions
 app.use(morgan('dev'));
 app.use(cookieParser());
 app.use(flash()); // use connect-flash for flash messages stored in session
-app.use("/public", express.static(path.join(__dirname, 'public'))); //static path declaration
 
 app.set('view engine', 'ejs'); // assigning view engine
 app.engine('html', require('ejs').renderFile);
@@ -54,15 +61,11 @@ models.sequelize.sync().then(function(){
 
 
 // importing routes and passing passport as auth.js need it
-var authRoute = require('./routes/routes.js')(app,passport);
+var authRoute = require('./routes/routes.js')(app,passport,models.user);
 
 //loading passport strategies
 require('./config/passport.js')(passport, models.user, models.auth_user);
 
-
-
-
-// require('./app/routes.js')(app, passport); //we are passing app and passport to routes.js
 
 
 app.listen(port, function(err){

@@ -9,7 +9,7 @@ module.exports = function(sequelize, Sequelize) {
 		lastname 	: 	{ type: Sequelize.STRING },
 		displayName : 	{ type: Sequelize.STRING },
 		imageURL 	: 	{ type: Sequelize.STRING },
-		email 		: 	{ type: Sequelize.STRING, validate: {isEmail:true} }
+		email 		: 	{ type: Sequelize.STRING }
 	});
 	// Auth_user.drop();
 	return Auth_user; 

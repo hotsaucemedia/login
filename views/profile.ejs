@@ -16,15 +16,19 @@
 		<div class="col-sm-3">
 			<div class="well" style="word-wrap:break-word;">
 				<h3><span class="fa fa-user"></span> Local</h3>
-
-					<p>
+				<% if (user.password) { %>
+                    <p>
 						<strong>id</strong>: <%= user.id%><br>
 						<strong>First name</strong>: <%= user.firstname %><br>
 						<strong>Last name</strong>: <%= user.lastname %><br>
 						<strong>Password</strong>: <%= user.password %><br>
 						<strong>Email</strong>: <%= user.email %>
-					</p>
+                    </p>
+                    <a href="/logout" class="btn btn-default fa fa-user"> Logout</a>
 
+                <% } else { %>
+                    <a href="/login" class="btn btn-default fa fa-anchor"> Login</a>
+                <% } %>
 			</div>
 		</div>
 
@@ -32,13 +36,18 @@
         <div class="col-sm-3">
             <div class="well" style="word-wrap:break-word;">
                 <h3><span class="fa fa-facebook"></span> Facebook</h3>
-
-                <p>
-                    <strong>fid</strong>: <%= user.f_id %><br>
-                    <strong>displayName</strong>: <%= user.f_name %><br>
-                    <strong>Token</strong>: <%= user.f_token %><br>
-                    <strong>Email</strong>: <%= user.email %><br>
-                </p>
+				<% if (user.f_token) { %>
+                    <p>
+   						<strong>id</strong>: <%= user.id%><br>
+                    	<strong>fid</strong>: <%= user.f_id %><br>
+                    	<strong>displayName</strong>: <%= user.f_name %><br>
+                   		<strong>Token</strong>: <%= user.f_token %><br>
+                    	<strong>Email</strong>: <%= user.email %><br>
+                    </p>
+                    <a href="/unlink/facebook" class="btn btn-default">Unlink</a>
+                <% } else { %>
+                    <a href="/connect/facebook" class="btn btn-default fa fa-facebook"> Login</a>
+                <% } %>
             </div>
         </div>
 
@@ -46,13 +55,18 @@
         <div class="col-sm-3">
             <div class="well" style="word-wrap:break-word;">
                 <h3><span class="fa fa-google-plus"></span> Google</h3>
-
-                <p>
-                    <strong>gid</strong>: <%= user.g_id %><br>
-                    <strong>displayName</strong>: <%= user.g_name %><br>
-                    <strong>Token</strong>: <%= user.g_token %><br>
-                    <strong>Email</strong>: <%= user.email %><br>
-                </p>
+				<% if (user.g_token) { %>
+	                <p>
+   						<strong>id</strong>: <%= user.id%><br>
+	                    <strong>gid</strong>: <%= user.g_id %><br>
+	                    <strong>displayName</strong>: <%= user.g_name %><br>
+	                    <strong>Token</strong>: <%= user.g_token %><br>
+	                    <strong>Email</strong>: <%= user.email %><br>
+	                </p>
+                    <a href="/unlink/google" class="btn btn-default">Unlink</a>
+                <% } else { %>
+                    <a href="/connect/google" class="btn btn-default fa fa-google-plus"> Login</a>
+                <% } %>
             </div>
         </div>
 
@@ -60,16 +74,20 @@
         <div class="col-sm-3">
             <div class="well" style="word-wrap:break-word;">
                 <h3><span class="fa fa-twitter"></span> Twitter</h3>
-
-                <p>
-                    <strong>tid</strong>: <%= user.t_id %><br>
-                    <strong>displayName</strong>: <%= user.t_name %><br>
-                    <strong>Token</strong>: <%= user.t_token %><br>
-                    <strong>Email</strong>: <%= user.email %><br>
-                </p>
+				<% if (user.t_token) { %>
+	                <p>
+   						<strong>id</strong>: <%= user.id%><br>	                    
+	                    <strong>tid</strong>: <%= user.t_id %><br>
+	                    <strong>displayName</strong>: <%= user.t_name %><br>
+	                    <strong>Token</strong>: <%= user.t_token %><br>
+	                    <strong>Email</strong>: <%= user.email %><br>
+	                </p>                
+                    <a href="/unlink/twitter" class="btn btn-default">Unlink</a>
+                <% } else { %>
+                    <a href="/connect/twitter" class="btn btn-default fa fa-twitter"> Login</a>
+                <% } %>
             </div>
         </div>
-
 	</div>
 
 </div>
